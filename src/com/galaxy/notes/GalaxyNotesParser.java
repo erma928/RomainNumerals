@@ -1,18 +1,16 @@
-package com.galaxy.parser;
+package com.galaxy.notes;
 
-import com.galaxy.exceptions.GalaxyMetalNotFoundException;
-import com.galaxy.exceptions.GalaxyNumeralFormatException;
-import com.galaxy.exceptions.RomanNumeralFormatException;
-import com.galaxy.numeral.GalaxyTranslator;
+import com.galaxy.exceptions.NumberFormatException;
+import com.galaxy.exceptions.MetalNotFoundException;
+import com.galaxy.numeral.*;
 
 import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 笔记解析与问题回答
+ * notes parsing and question answering
  *
- * Created by fengjimin on 1/5/19.
  */
 public class GalaxyNotesParser {
 
@@ -25,10 +23,12 @@ public class GalaxyNotesParser {
     static final String GROUP_NUMERAL_METAL= "numeralMetal";
     static final String UNKNOWN_QUESTION_ANSWER = "I have no idea what you are talking about";
 
-    private GalaxyTranslator galaxyTranslator;
+    private NumberBuilder galaxyNumber;
+    private MetalPriceCalculator calculator;
 
     public GalaxyNotesParser() {
-        galaxyTranslator = new GalaxyTranslator();
+        galaxyNumber = NumberBuilderFactory.getNumberBuilderByNumeralType(NumeralType.GALAXY);
+        calculator = new MetalPriceCalculator(galaxyNumber);
     }
 
     /**
@@ -55,10 +55,9 @@ public class GalaxyNotesParser {
      * 处理该行笔记
      * @param notesLine
      * @return 如果笔记为信息相关，则
-     * @throws GalaxyNumeralFormatException
-     * @throws RomanNumeralFormatException
+     * @throws NumberFormatException
      */
-    public String processNotesLine(String notesLine) throws GalaxyNumeralFormatException, RomanNumeralFormatException {
+    public String processNotesLine(String notesLine) throws NumberFormatException {
         if (isInfo(notesLine)) {
             parseSymbol(notesLine).parseCredit(notesLine);
             return null;
@@ -78,18 +77,17 @@ public class GalaxyNotesParser {
             Matcher matcher = HOW_MUCH_PATTERN.matcher(notesLine);
             if (matcher.find()) {
                 String numeral = matcher.group(GROUP_NUMERAL);
-                return numeral + "is " + galaxyTranslator.getValue(numeral.trim());
+                return numeral + "is " + galaxyNumber.buildFromRepresentation(numeral.trim()).getValue();
             } else {
                 Matcher matcher2 = HOW_MANY_PATTERN.matcher(notesLine);
                 if (matcher2.find()) {
                     String numeralMetal = matcher2.group(GROUP_NUMERAL_METAL);
-                    BigDecimal amount = galaxyTranslator.getAmount(numeralMetal);
+                    BigDecimal amount = calculator.getAmount(numeralMetal);
                     return numeralMetal + "is " + amount.intValue() + " Credits";
                 }
             }
-        } catch (GalaxyNumeralFormatException e) {
-        } catch (RomanNumeralFormatException e) {
-        } catch (GalaxyMetalNotFoundException e) {
+        } catch (NumberFormatException e) {
+        } catch (MetalNotFoundException e) {
         }
 
         return UNKNOWN_QUESTION_ANSWER;
@@ -100,17 +98,17 @@ public class GalaxyNotesParser {
         if (matcher.find()) {
             String gSymbol = matcher.group(1);
             String rSymbol = matcher.group(2);
-            galaxyTranslator.addSymbol(gSymbol, rSymbol.charAt(0));
+            GalaxySymbol.addSymbol(gSymbol, rSymbol);
         }
         return this;
     }
 
-    public GalaxyNotesParser parseCredit(String notesLine) throws GalaxyNumeralFormatException, RomanNumeralFormatException {
+    public GalaxyNotesParser parseCredit(String notesLine) throws NumberFormatException {
         Matcher matcher = CREDIT_PATTERN.matcher(notesLine);
         if (matcher.find()) {
             String numeralMetal = matcher.group(GROUP_NUMERAL_METAL);
             String amount = matcher.group(GROUP_AMOUNT);
-            galaxyTranslator.addPrice(numeralMetal, new BigDecimal(amount));
+            calculator.addPrice(numeralMetal, new BigDecimal(amount));
         }
 
         return this;

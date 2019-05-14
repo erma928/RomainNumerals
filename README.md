@@ -1,17 +1,49 @@
 ### INSRUCTIONS TO RUN
 
-1. 解压缩，在galaxy目录下, 运行 `ant`
-2. `java -cp galaxy.jar com.galaxy.GalaxyApp <path to input file>`
+1. `unzip galaxy.zip`
+2. `cd galaxy/`
+2. `ant`
+3. `java -cp galaxy.jar com.galaxy.GalaxyApp <path to input file>`
 
 
 ### PROGRAM DESIGN
 
-1. 主要相关类设计:
-	* `RomanSymbol`: enum类，支持定义罗马数字符号和数值，以及其相关属性和支持的操作
-	* `GalaxyRomanNumeral`: 支持罗马数与阿拉伯数字的转化逻辑，采用了一个线性转化算法
-	* `GalaxyTranslator`: 支持星系符号与罗马数的转化逻辑
-	* `GalaxyNotesParser`: 支持笔记文本的信息解析和问题解答，主要利用正则表达式
-2. 罗马数与阿拉伯数转化算法:
-    线性复杂度，在一个循环内，采用stack数据结构，存储中间计算的数值，支持各种罗马数规则检验。
-3. 更多信息:
-	请看代码及其文档。
+1. class design
+
+        |- Symbol
+            |- GalaxySymbol
+            |- RomanSymbol
+        |- Number
+            |- GalaxyNumber
+            |- RomanNumber
+        |- NumberBuilder
+            |- GalaxyNumberBuilder
+            |- RomanNumberBuilder
+        |- NumberParser
+            |- BaseNumberParser
+        |- ParseRule
+            |- BaseDisjunctiveRule
+                |- DescendingRule
+                |- RepeatableRule
+                |- SubtractableRule
+        |- NumberBuilderFactory
+        |- GalaxyNotesParser
+        |- MetalPriceCalculator
+    		
+	* `Symbol` classes: symbols with the number systems; also encodes the rules for conversion btw them
+	* `Number` classes: immutable classes for the numbers, no direct instantiation is allowed
+	* `NumberParser` classes: generic class to encode the algorithm for parsing the numbers
+	* `NumberBuilder` classes: generic class to build the numbers; numbers are only allowed to be created via builder
+	* `ParserRule` classes: encodes the parsing rules; the rules can be disjunctive or conjunctive
+	* `NumberBuilderFactory` class: factory class to create builders
+	* `GalaxyNotesParser` class: I/O supported
+2. algorithm for parsing roman numerals:
+    * O(n) complexity; makes use of stack for storing intermediate results in processing loop
+3. rationale behind:
+    * By restricting the creation of numbers to builders, we can encapsulate rules properly for the number system
+    * By restricting the creation of builders to `NumberBuilderFactory`, we can control the proper initialization of them
+    * By using generic `NumberParser` classes, we are able to abstract common parsing logic for different numerals
+    * By using `ParseRule` classes, we can use different set of rules for different numeral systems, making it easy to extend
+    
+3. more:
+	* please refer to the code and documentations.

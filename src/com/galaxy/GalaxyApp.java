@@ -1,8 +1,7 @@
 package com.galaxy;
 
-import com.galaxy.exceptions.GalaxyNumeralFormatException;
-import com.galaxy.exceptions.RomanNumeralFormatException;
-import com.galaxy.parser.GalaxyNotesParser;
+import com.galaxy.exceptions.NumberFormatException;
+import com.galaxy.notes.GalaxyNotesParser;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,7 +26,6 @@ public class GalaxyApp {
                 if (response!=null) {
                     System.out.println(response);
                 }
-
             }
             fileInputStream.close();
             scanner.close();
@@ -35,9 +33,7 @@ public class GalaxyApp {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (GalaxyNumeralFormatException e) {
-            e.printStackTrace();
-        } catch (RomanNumeralFormatException e) {
+        } catch (NumberFormatException e) {
             e.printStackTrace();
         }
 

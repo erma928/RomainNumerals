@@ -1,10 +1,10 @@
-package com.galaxy.parser;
+package com.galaxy.notes;
 
+import com.galaxy.notes.GalaxyNotesParser;
 import junit.framework.TestCase;
 import org.junit.Before;
 
 /**
- * Created by fengjimin on 1/6/19.
  */
 public class GalaxyNotesParserTest extends TestCase {
 
@@ -37,13 +37,13 @@ public class GalaxyNotesParserTest extends TestCase {
     @org.junit.Test
     public void testIsHowQuestion() throws Exception {
         String symbol = "glob is I";
-        assertEquals(galaxyNotesParser.isInfo(symbol), false);
+        assertEquals(galaxyNotesParser.isInfo(symbol), true);
 
         symbol = "how many Credits is glob prok Iron ?";
-        assertEquals(galaxyNotesParser.isInfo(symbol), true);
+        assertEquals(galaxyNotesParser.isInfo(symbol), false);
 
         symbol = "how much is pish tegj glob glob ?";
-        assertEquals(galaxyNotesParser.isInfo(symbol), true);
+        assertEquals(galaxyNotesParser.isInfo(symbol), false);
 
     }
 
